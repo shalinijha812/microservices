@@ -1,36 +1,24 @@
 version:  '2'
 
 services:
- api:
-   image:  spring-api
-   build:  zuulgateway/
+ eureka:
+   image:  spring-eureka-server
+   build:  spring-eureka-server/
+   restart: always
    network_mode:  host
-   container_name:  api-spring
-   depends_on:
-     -  spring
+   container_name:  eureka-server-spring
    ports:
-     -  9090:9090
+     -  8761:8761
    expose:
-     -  9090
- spring:
-   image:  spring
-   build:  movie-service/
-   restart:  always
-   network_mode:  host
-   container_name:  spring-docker2
-   depends_on:
-     -  config
-   ports:
-     -  8098:8098
-   expose:
-     -  8098
+     -  8761
  config:
    image:  config-server
    build:  config-server/
+   restart: always
    network_mode:  host
    container_name:  config-server-spring
    depends_on:
-     -  mongo
+     -  eureka
    ports:
      -  8888:8888
    expose:
@@ -42,16 +30,34 @@ services:
    container_name:  mongo-docker
    network_mode:  host
    depends_on: 
-      -  eureka
+      -  config
    volumes:
      - '/home/data/mysql:/data/db'
-
- eureka:
-   image:  spring-eureka-server
-   build:  spring-eureka-server/
+ spring:
+   image:  spring
+   build:  movie-service/
+   restart:  always
    network_mode:  host
-   container_name:  eureka-server-spring
+   container_name:  spring-docker2
+   depends_on:
+     -  mongo
    ports:
-     -  8761:8761
+     -  8098:8098
    expose:
-     -  8761
+     -  8098
+ api:
+   image:  spring-api
+   build:  zuulgateway/
+   network_mode:  host
+   container_name:  api-spring
+   depends_on:
+     -  spring
+   ports:
+     -  9090:9090
+   expose:
+     -  9090
+
+
+
+
+ 
